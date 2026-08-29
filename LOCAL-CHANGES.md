@@ -17,32 +17,46 @@
 
 ---
 
-## 1. PyJWT 를 2.13.0 으로 올림 (2026-08-30)
+## 1. social-auth-core 5.1.0 으로 올림 (2026-08-30)
 
 **왜** — Trivy 가 운영 이미지에서 `CVE-2026-48526` (HIGH) 를 잡았다.
 PyJWT 2.12.1 의 *Authentication bypass due to forged JSON Web Tokens* 다.
 NetBox 가 authentik OIDC 로 로그인하므로 JWT 를 실제로 다룬다. 고침 버전은
 2.13.0 인데 **업스트림 4.6.9 에도 2.12.1 이 그대로** 들어 있다.
 
-**어떻게** — `requirements.txt` 에 `PyJWT==2.13.0` 을 직접 넣었다.
+**처음에 PyJWT 만 올리려다 실패했다.** PyJWT 는 NetBox 가 직접 쓰는 것이
+아니라 `social-auth-core` 가 끌고 온다. 4.8.7 은 `PyJWT[crypto]==2.12.1` 로
+**등호 고정**이라 `uv` 가 정확히 거부한다:
 
-PyJWT 는 NetBox 가 직접 쓰는 것이 아니라 `social-auth-core` 가 끌고 온다.
-그런데 4.8.7 은 `PyJWT[crypto]==2.12.1` 로 **등호 고정**이라 그냥은 안 올라간다.
+    Because social-auth-core==4.8.7 depends on pyjwt[crypto]==2.12.1
+    and you require pyjwt==2.13.0 → incompatible
 
-    social-auth-core 4.8.7  PyJWT[crypto]==2.12.1   ← NetBox 가 고정한 버전
-                     4.9.0  PyJWT[crypto]>=2.12.1
-                     5.0.0  PyJWT[crypto]>=2.13.0
-                     5.1.0  PyJWT[crypto]>=2.13.0
+억지로 넣을 수 없다는 뜻이고, 잘못된 조합이 조용히 설치되는 것보다 낫다.
+netbox-docker 의 Dockerfile 주석도 이 상황을 예고한다
+("we have potential version conflicts and the build will fail").
 
-`social-auth-core` 를 5.1.0 으로 올리는 정공법도 있지만 **메이저 상승**이라
-OIDC 동작이 바뀔 수 있다. 깨지면 NetBox 만이 아니라 로그인 자체가 막힌다.
-변경 폭이 작은 쪽을 골랐다 - PyJWT 2.12.1 → 2.13.0 은 패치 수준이다.
+**어떻게** — `requirements.txt` 의 `social-auth-core` 를 4.8.7 → **5.1.0** 으로.
 
-의존성 해석기가 `social-auth-core` 의 고정과 충돌한다고 경고할 수 있다.
-그래도 설치되며, **실제로 동작하는지는 빌드 후 컨테이너에서 확인했다**
-(import, JWT 서명/검증 왕복, social-auth 백엔드 로드).
+    4.8.7  PyJWT[crypto]==2.12.1
+    4.9.0  PyJWT[crypto]>=2.12.1
+    5.0.0  PyJWT[crypto]>=2.13.0
+    5.1.0  PyJWT[crypto]>=2.13.0   ← 여기
 
-**되돌리려면** — `requirements.txt` 에서 `PyJWT==2.13.0` 줄을 지우면 된다.
+**메이저 상승인데 왜 받아들였나** — 5.x 변경의 대부분이 보안 수정이다.
+LINE/Shopify/LoginRadius/Twilio 로그인 CSRF, SAML 응답 검증, partial pipeline
+세션 소유권 확인. 특히 5.1.0 의 **"OIDC 백엔드가 토큰 갱신 시 ID 토큰을
+검증하고 신원 변경을 거부"** 는 authentik OIDC 를 쓰는 이 환경에 직접 해당한다.
+
+NetBox 의 사용면도 좁다 - `social_core`/`social_django` 참조가 16곳뿐이고 전부
+표준 파이프라인(`social_details`, `social_uid`, `social_user` …)과 미들웨어다.
+5.x 가 바꾼 것은 백엔드별 검증 로직이지 이 파이프라인 API 가 아니다.
+
+**주의** — 4.9.0 릴리스 노트에 "This release might contain breaking changes"
+가 있다. 제거된 백엔드들이 있는데 여기서 쓰는 것은 일반 OIDC 하나뿐이다.
+
+**되돌리려면** — `social-auth-core==4.8.7` 로 되돌린다. 그러면 PyJWT 도 2.12.1
+로 내려가고 CVE 가 다시 열린다.
 
 **언제 이 수정을 버리나** — 업스트림이 `social-auth-core` 를 5.x 로 올리면
-PyJWT 도 따라 올라가므로 이 줄은 불필요해진다. 그때 지운다.
+이 줄은 업스트림과 같아진다. 그때 병합하며 자연히 사라진다.
+
