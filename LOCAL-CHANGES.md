@@ -61,6 +61,35 @@ NetBox 의 사용면도 좁다 - `social_core`/`social_django` 참조가 16곳�
 **주의** — 4.9.0 릴리스 노트에 "This release might contain breaking changes"
 가 있다. 제거된 백엔드들이 있는데 여기서 쓰는 것은 일반 OIDC 하나뿐이다.
 
+### 딸려온 수정 — 로그인 링크를 POST 폼으로
+
+`social-auth-app-django` 6.0 부터 `social:begin` 뷰에 `@require_POST` 가 붙었다.
+로그인 CSRF 를 막기 위한 변경이다.
+
+    social_django/views.py
+      @require_POST
+      def auth(request, backend): ...
+
+NetBox 4.6.9 의 `netbox/templates/login.html` 은 SSO 버튼을 `<a href>` 로
+그리므로 GET 이 되고, **405 Method Not Allowed** 가 난다. 처음 배포했을 때
+실제로 이 증상이 났고 되돌렸다.
+
+`<a>` 를 `<form method="post">` + `{% csrf_token %}` 으로 바꿨다. 쿼리
+파라미터(`next`, `idp`)는 `action` 에 그대로 남는다 - POST 여도 전달된다.
+
+**되돌리지 말 것.** `@require_POST` 는 보안 수정이므로, 업스트림이 언젠가
+같은 방식으로 템플릿을 고칠 것이다. 그때 병합에서 충돌이 나면 업스트림 쪽을
+받으면 된다.
+
+### 검증에서 배운 것
+
+첫 배포 때 컨테이너 안에서 JWT 왕복·서명 검증·백엔드 로드를 확인하고 넘어갔다.
+전부 통과했지만 **URL 뷰의 허용 메서드 변경은 그 검증으로 잡히지 않았다.**
+라이브러리가 로드되는 것과 로그인 흐름이 도는 것은 다른 문제다.
+
+이후로는 배포 전에 **실제 흐름을 태운다** - `/login/` 에서 CSRF 토큰을 받아
+`/oauth/login/oidc/` 로 POST 해서 authentik 으로 302 가 나오는지 확인한다.
+
 **되돌리려면** — `social-auth-core==4.8.7` 로 되돌린다. 그러면 PyJWT 도 2.12.1
 로 내려가고 CVE 가 다시 열린다.
 
