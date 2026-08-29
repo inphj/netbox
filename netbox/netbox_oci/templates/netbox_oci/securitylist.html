@@ -1,0 +1,28 @@
+{% extends 'generic/object.html' %}
+{% load render_table from django_tables2 %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+  <div class="col col-md-6">
+    <div class="card">
+      <h2 class="card-header">{% trans "보안목록" %}</h2>
+      <table class="table table-hover attr-table">
+        <tr><th scope="row">{% trans "이름" %}</th><td>{{ object.name }}</td></tr>
+        <tr><th scope="row">VCN</th><td>{{ object.vcn }}</td></tr>
+        <tr><th scope="row">{% trans "테넌시" %}</th>
+            <td><a href="{{ object.tenant.get_absolute_url }}">{{ object.tenant }}</a></td></tr>
+        <tr><th scope="row">{% trans "설명" %}</th><td>{{ object.description|placeholder }}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="row mt-3">
+  <div class="col col-md-12">
+    <div class="card">
+      <h2 class="card-header">{% trans "규칙" %}</h2>
+      {% render_table rules_table %}
+    </div>
+  </div>
+</div>
+{% endblock %}

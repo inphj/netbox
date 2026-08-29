@@ -1,0 +1,22 @@
+{% extends 'generic/object.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+  <div class="col col-md-6">
+    <div class="card">
+      <h2 class="card-header">{% trans "보안규칙" %}</h2>
+      <table class="table table-hover attr-table">
+        <tr><th scope="row">{% trans "보안목록" %}</th>
+            <td><a href="{{ object.security_list.get_absolute_url }}">{{ object.security_list }}</a></td></tr>
+        <tr><th scope="row">{% trans "방향" %}</th><td>{{ object.get_direction_display }}</td></tr>
+        <tr><th scope="row">{% trans "프로토콜" %}</th><td>{{ object.protocol }}</td></tr>
+        <tr><th scope="row">{% trans "포트" %}</th><td>{{ object.ports|default:"전체" }}</td></tr>
+        <tr><th scope="row">{% trans "상대" %}</th><td>{{ object.peer }}</td></tr>
+        <tr><th scope="row">{% trans "스테이트리스" %}</th><td>{{ object.stateless }}</td></tr>
+        <tr><th scope="row">{% trans "설명" %}</th><td>{{ object.description|placeholder }}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
