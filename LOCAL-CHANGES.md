@@ -35,7 +35,14 @@ NetBox 가 authentik OIDC 로 로그인하므로 JWT 를 실제로 다룬다. �
 netbox-docker 의 Dockerfile 주석도 이 상황을 예고한다
 ("we have potential version conflicts and the build will fail").
 
-**어떻게** — `requirements.txt` 의 `social-auth-core` 를 4.8.7 → **5.1.0** 으로.
+**어떻게** — `social-auth-core` 4.8.7 → **5.1.0**, 그리고 짝인
+`social-auth-app-django` 5.9.0 → **6.0.1**.
+
+코어만 올리면 또 막힌다. `app-django` 가 코어 버전을 좁게 묶고 있다:
+
+    app-django 5.9.0  social-auth-core <5.0.0,>=4.8.3   ← 코어 5.x 를 거부
+    app-django 6.0.1  social-auth-core <6.0.0,>=5.0.0   ← 여기
+                      Django 6.0 분류 있음 (NetBox 는 Django 6.0.8)
 
     4.8.7  PyJWT[crypto]==2.12.1
     4.9.0  PyJWT[crypto]>=2.12.1
