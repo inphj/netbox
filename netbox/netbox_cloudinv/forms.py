@@ -99,6 +99,16 @@ class CloudResourceForm(NetBoxModelForm):
                   "environment", "status", "tenant", "monthly_cost", "description",
                   "attrs", "tags")
 
+    def clean_attrs(self):
+        """빈 값이면 JSONField 가 None 을 돌려주는데 모델 컬럼은 NOT NULL 이다.
+
+        그대로 저장하면 IntegrityError 로 500 이 난다. attrs 는 선택 항목이고
+        대부분의 행이 비어 있을 것이므로, 이걸 안 막으면 **가장 흔한 입력
+        경로가 깨진다.** 실측으로 잡았다.
+        """
+        value = self.cleaned_data.get("attrs")
+        return {} if value is None else value
+
 
 class CloudResourceFilterForm(NetBoxModelFilterSetForm):
     model = CloudResource
