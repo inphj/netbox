@@ -39,12 +39,22 @@ AWS 와 Azure 만 해도 서비스가 수백 개다. 종류마다 모델을 만�
     일괄 등록    CSV. 처음 채울 때
     REST API     나중에 필요하면
 
-`seed/` 에 바로 쓸 수 있는 CSV 가 있다. **순서대로** 넣는다.
+`seed/` 에 바로 쓸 수 있는 CSV 가 있다. **순서대로** 넣는다 - 서비스는
+플랫폼을 참조하므로 플랫폼이 먼저다.
 
-    01-platforms.csv        AWS · Azure           2건
-    02-services-aws.csv     AWS 서비스 카탈로그    49건
-    03-services-azure.csv   Azure 서비스 카탈로그  51건
-    04-resources-template.csv  자원 입력 서식      예시 2건
+    01-platforms.csv          AWS · Azure · OCI · Proxmox VE   4건
+    02-services-aws.csv       AWS 서비스 카탈로그              49건
+    03-services-azure.csv     Azure 서비스 카탈로그            51건
+    04-services-oci.csv       OCI 서비스 카탈로그              34건
+    05-services-proxmox.csv   Proxmox VE 서비스 카탈로그       26건
+    06-resources-template.csv 자원 입력 서식                   예시 2건
+
+OCI 카탈로그는 임의로 고른 것이 아니라 `ops/netbox/oci-collect.py` 가 실제로
+수집하는 자원(인스턴스·볼륨·VCN·서브넷·게이트웨이·라우트테이블·보안목록·
+IAM·버킷·예산·한도·LB·컴파트먼트)을 기준으로 잡았다.
+
+Proxmox 는 사설이므로 `kind=private` 이다. `0.0.0.0/0` 이 인터넷 노출을 뜻하지
+않는 쪽이라는 표시이기도 하다.
 
 서비스 카탈로그는 **자주 쓰는 것만 추린 것이고 전부가 아니다.** 없는 서비스는
 행을 추가한다. 안 쓰는 것은 지운다.

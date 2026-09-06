@@ -1,0 +1,35 @@
+platform,code,label,category,description
+oci,compute,Compute,compute,인스턴스
+oci,container-instance,Container Instance,compute,컨테이너 인스턴스
+oci,oke,OKE,compute,관리형 쿠버네티스
+oci,functions,Functions,compute,서버리스 함수
+oci,boot-volume,Boot Volume,storage,부트 볼륨
+oci,block-volume,Block Volume,storage,블록 볼륨
+oci,object-storage,Object Storage,storage,버킷
+oci,file-storage,File Storage,storage,공유 파일시스템
+oci,backup,Volume Backup,storage,볼륨 백업
+oci,autonomous-db,Autonomous Database,database,자율운영 DB
+oci,mysql,MySQL HeatWave,database,관리형 MySQL
+oci,base-db,Base Database,database,VM DB 시스템
+oci,vcn,VCN,network,가상 클라우드 네트워크
+oci,subnet,Subnet,network,서브넷
+oci,internet-gateway,Internet Gateway,network,인터넷 게이트웨이
+oci,nat-gateway,NAT Gateway,network,NAT 게이트웨이
+oci,service-gateway,Service Gateway,network,서비스 게이트웨이
+oci,lpg,Local Peering Gateway,network,로컬 피어링 (LPG)
+oci,drg,Dynamic Routing Gateway,network,DRG
+oci,route-table,Route Table,network,라우트 테이블
+oci,dhcp-options,DHCP Options,network,DHCP 옵션
+oci,load-balancer,Load Balancer,network,로드밸런서
+oci,public-ip,Reserved Public IP,network,예약 공인 IP
+oci,dns,DNS,network,DNS 영역
+oci,security-list,Security List,security,보안목록
+oci,nsg,Network Security Group,security,네트워크 보안그룹
+oci,iam-policy,IAM Policy,security,정책 statement
+oci,iam-group,IAM Group,security,그룹·동적그룹
+oci,vault,Vault / KMS,security,키 관리
+oci,compartment,Compartment,ops,컴파트먼트
+oci,monitoring,Monitoring,ops,메트릭·알람
+oci,os-management-hub,OS Management Hub,ops,패키지 관리
+oci,budget,Budget,cost,예산
+oci,limits,Service Limits,cost,쿼터·한도

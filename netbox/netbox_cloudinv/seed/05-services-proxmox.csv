@@ -1,0 +1,27 @@
+platform,code,label,category,description
+proxmox,qemu-vm,QEMU VM,compute,전가상화 VM
+proxmox,lxc,LXC Container,compute,컨테이너
+proxmox,node,Node,compute,물리 노드
+proxmox,cluster,Cluster,compute,클러스터
+proxmox,template,Template,compute,VM·CT 템플릿
+proxmox,local-storage,Local Storage,storage,로컬 디렉터리 스토리지
+proxmox,lvm-thin,LVM-Thin,storage,씬 프로비저닝 볼륨
+proxmox,zfs,ZFS,storage,ZFS 풀
+proxmox,ceph,Ceph,storage,분산 스토리지
+proxmox,nfs,NFS / CIFS,storage,원격 공유 스토리지
+proxmox,vzdump,vzdump Backup,storage,백업 작업
+proxmox,pbs,Proxmox Backup Server,storage,백업 서버 연동
+proxmox,linux-bridge,Linux Bridge,network,브리지 (vmbr)
+proxmox,vlan,VLAN,network,VLAN 인터페이스
+proxmox,bond,Bond,network,본딩
+proxmox,sdn-zone,SDN Zone,network,SDN 영역
+proxmox,sdn-vnet,SDN VNet,network,SDN 가상 네트워크
+proxmox,firewall-rule,Firewall Rule,security,방화벽 규칙
+proxmox,security-group,Security Group,security,방화벽 보안그룹
+proxmox,ipset,IPSet / Alias,security,주소 집합
+proxmox,user-realm,Realm,security,인증 영역 (PAM·LDAP·OIDC)
+proxmox,api-token,API Token,security,API 토큰
+proxmox,acl,ACL,security,권한 할당
+proxmox,ha-group,HA Group,ops,고가용성 그룹
+proxmox,replication,Replication,ops,스토리지 복제
+proxmox,pool,Resource Pool,ops,자원 풀
