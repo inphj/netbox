@@ -1,0 +1,52 @@
+platform,code,label,category,description
+azure,vm,Virtual Machine,compute,가상 머신
+azure,vmss,VM Scale Set,compute,스케일셋
+azure,aks,AKS,compute,관리형 쿠버네티스
+azure,functions,Functions,compute,서버리스 함수
+azure,app-service,App Service,compute,웹앱 호스팅
+azure,container-apps,Container Apps,compute,컨테이너 앱
+azure,acr,Container Registry,compute,컨테이너 레지스트리
+azure,storage-account,Storage Account,storage,스토리지 계정
+azure,managed-disk,Managed Disk,storage,관리 디스크
+azure,blob,Blob Storage,storage,오브젝트 스토리지
+azure,files,Azure Files,storage,공유 파일
+azure,netapp-files,NetApp Files,storage,고성능 파일
+azure,backup,Azure Backup,storage,백업
+azure,sql-database,SQL Database,database,관리형 SQL
+azure,sql-mi,SQL Managed Instance,database,SQL MI
+azure,cosmos-db,Cosmos DB,database,NoSQL
+azure,postgresql,Database for PostgreSQL,database,PostgreSQL
+azure,mysql,Database for MySQL,database,MySQL
+azure,redis-cache,Cache for Redis,database,Redis
+azure,vnet,Virtual Network,network,가상 네트워크
+azure,subnet,Subnet,network,서브넷
+azure,load-balancer,Load Balancer,network,로드밸런서
+azure,application-gateway,Application Gateway,network,L7 게이트웨이
+azure,front-door,Front Door,network,글로벌 진입점/CDN
+azure,dns,Azure DNS,network,DNS
+azure,vpn-gateway,VPN Gateway,network,VPN
+azure,expressroute,ExpressRoute,network,전용회선
+azure,nat-gateway,NAT Gateway,network,NAT
+azure,private-link,Private Link,network,프라이빗 연결
+azure,entra-id,Microsoft Entra ID,security,디렉터리/계정
+azure,key-vault,Key Vault,security,키/비밀 관리
+azure,nsg,Network Security Group,security,보안그룹
+azure,firewall,Azure Firewall,security,방화벽
+azure,waf,WAF,security,웹 방화벽
+azure,defender,Defender for Cloud,security,위협 탐지
+azure,ddos-protection,DDoS Protection,security,DDoS 방어
+azure,service-bus,Service Bus,integration,메시징
+azure,event-hub,Event Hubs,integration,이벤트 수집
+azure,event-grid,Event Grid,integration,이벤트 라우팅
+azure,logic-apps,Logic Apps,integration,워크플로
+azure,api-management,API Management,integration,API 관리
+azure,synapse,Synapse Analytics,analytics,데이터웨어하우스
+azure,data-factory,Data Factory,analytics,ETL
+azure,databricks,Databricks,analytics,분석 플랫폼
+azure,log-analytics,Log Analytics,analytics,로그 분석
+azure,monitor,Azure Monitor,ops,모니터링
+azure,automation,Automation,ops,자동화
+azure,policy,Azure Policy,ops,정책
+azure,arc,Azure Arc,ops,하이브리드 관리
+azure,resource-graph,Resource Graph,ops,자원 질의
+azure,cost-management,Cost Management,cost,비용 관리

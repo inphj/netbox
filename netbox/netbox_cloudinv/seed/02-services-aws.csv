@@ -1,0 +1,50 @@
+platform,code,label,category,description
+aws,ec2,EC2,compute,가상 인스턴스
+aws,ecs,ECS,compute,컨테이너 오케스트레이션
+aws,eks,EKS,compute,관리형 쿠버네티스
+aws,lambda,Lambda,compute,서버리스 함수
+aws,batch,Batch,compute,배치 작업
+aws,s3,S3,storage,오브젝트 스토리지
+aws,ebs,EBS,storage,블록 볼륨
+aws,efs,EFS,storage,공유 파일시스템
+aws,fsx,FSx,storage,관리형 파일시스템
+aws,backup,Backup,storage,백업
+aws,rds,RDS,database,관계형 DB
+aws,aurora,Aurora,database,Aurora 클러스터
+aws,dynamodb,DynamoDB,database,NoSQL
+aws,elasticache,ElastiCache,database,Redis/Memcached
+aws,redshift,Redshift,database,데이터웨어하우스
+aws,documentdb,DocumentDB,database,문서 DB
+aws,vpc,VPC,network,가상 네트워크
+aws,subnet,Subnet,network,서브넷
+aws,elb,ELB/ALB/NLB,network,로드밸런서
+aws,nat-gateway,NAT Gateway,network,NAT 게이트웨이
+aws,cloudfront,CloudFront,network,CDN
+aws,route53,Route 53,network,DNS
+aws,api-gateway,API Gateway,network,API 게이트웨이
+aws,transit-gateway,Transit Gateway,network,TGW
+aws,direct-connect,Direct Connect,network,전용회선
+aws,iam,IAM,security,계정/권한
+aws,kms,KMS,security,키 관리
+aws,secrets-manager,Secrets Manager,security,비밀 관리
+aws,acm,ACM,security,인증서
+aws,waf,WAF,security,웹 방화벽
+aws,guardduty,GuardDuty,security,위협 탐지
+aws,security-hub,Security Hub,security,보안 통합
+aws,security-group,Security Group,security,보안그룹
+aws,nacl,Network ACL,security,네트워크 ACL
+aws,sns,SNS,integration,알림
+aws,sqs,SQS,integration,큐
+aws,eventbridge,EventBridge,integration,이벤트 버스
+aws,step-functions,Step Functions,integration,워크플로
+aws,athena,Athena,analytics,쿼리
+aws,glue,Glue,analytics,ETL
+aws,kinesis,Kinesis,analytics,스트리밍
+aws,opensearch,OpenSearch,analytics,검색/로그
+aws,cloudwatch,CloudWatch,ops,모니터링
+aws,cloudtrail,CloudTrail,ops,감사 로그
+aws,config,Config,ops,구성 추적
+aws,ssm,Systems Manager,ops,운영 관리
+aws,organizations,Organizations,ops,계정 조직
+aws,cost-explorer,Cost Explorer,cost,비용 분석
+aws,budgets,Budgets,cost,예산
