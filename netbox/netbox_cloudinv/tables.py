@@ -46,7 +46,10 @@ class CloudResourceTable(NetBoxTable):
     name = tables.Column(linkify=True, verbose_name="이름")
     platform = tables.Column(linkify=True, verbose_name="플랫폼")
     service = tables.Column(linkify=True, verbose_name="서비스")
-    category = tables.Column(accessor="service__category", verbose_name="분류")
+    # 관계 너머의 choice 라 ChoiceFieldColumn 이 라벨을 못 찾는다. 모델의
+    # get_..._display 를 직접 부른다 - 아니면 "compute" 같은 raw 값이 찍힌다.
+    category = tables.Column(accessor="service__get_category_display",
+                             verbose_name="분류", orderable=False)
     account = tables.Column(verbose_name="계정")
     region = tables.Column(verbose_name="리전")
     environment = tables.Column(verbose_name="환경")

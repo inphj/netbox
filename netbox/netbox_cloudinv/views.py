@@ -1,4 +1,5 @@
 from netbox.views import generic
+from utilities.query import count_related
 
 from . import filtersets, forms, tables
 from .models import CloudPlatform, CloudResource, CloudService
@@ -9,7 +10,12 @@ from .models import CloudPlatform, CloudResource, CloudService
 
 
 class CloudPlatformListView(generic.ObjectListView):
-    queryset = CloudPlatform.objects.all()
+    # LinkedCountColumn 은 annotate 된 값을 읽는다. 안 걸면 default=0 이 그대로
+    # 찍혀 서비스가 49개인데 화면에 0 으로 나온다 (실측으로 잡음).
+    queryset = CloudPlatform.objects.annotate(
+        service_count=count_related(CloudService, "platform"),
+        resource_count=count_related(CloudResource, "platform"),
+    )
     table = tables.CloudPlatformTable
     filterset = filtersets.CloudPlatformFilterSet
     filterset_form = forms.CloudPlatformFilterForm
@@ -19,7 +25,8 @@ class CloudPlatformView(generic.ObjectView):
     queryset = CloudPlatform.objects.all()
 
     def get_extra_context(self, request, instance):
-        services = CloudService.objects.filter(platform=instance)
+        services = CloudService.objects.filter(platform=instance).annotate(
+            resource_count=count_related(CloudResource, "service"))
         t = tables.CloudServiceTable(services)
         t.configure(request)
         return {"services_table": t}
@@ -50,7 +57,9 @@ class CloudPlatformBulkDeleteView(generic.BulkDeleteView):
 
 
 class CloudServiceListView(generic.ObjectListView):
-    queryset = CloudService.objects.select_related("platform")
+    queryset = CloudService.objects.select_related("platform").annotate(
+        resource_count=count_related(CloudResource, "service"),
+    )
     table = tables.CloudServiceTable
     filterset = filtersets.CloudServiceFilterSet
     filterset_form = forms.CloudServiceFilterForm
