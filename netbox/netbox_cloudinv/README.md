@@ -110,29 +110,41 @@ changelog 0건). 자동 수집을 안 하는 대가로 얻는 것이다.
 
 ## 검증
 
-<!-- verified: 2026-09-07 | how: 아래 절차를 실제로 돌렸다 -->
+<!-- verified: 2026-09-07 | how: 이미지 4.6.9-13-g862826fc0 로 배포 후
+     운영 파드에서 아래를 실제로 돌렸다 -->
 
-이미지 `4.6.9-8-g9def497a9` 로 배포한 뒤 운영 파드에서 확인했다.
-
-    마이그레이션      showmigrations [X] 0001_initial
-                      makemigrations --check 로 모델과 일치 확인 (No changes detected)
-    테이블            netbox_cloudinv_{cloudplatform,cloudresource,cloudservice} 3개
-    페이지 렌더       12개 전부 200
-                      목록·상세·추가폼·일괄등록·변경이력 × 3모델 + 필터 + 검색
-    필터 정확도       category=compute 결과에 EC2 있고 S3 없음
-    상세 표시         attrs(JSON)와 이름이 본문에 출력됨
-    일괄 등록         CSV 직접 입력으로 1건 생성 (302 리다이렉트)
-    카탈로그          플랫폼 2건, 서비스 100건 (AWS 49 / Azure 51) 등록됨
+    마이그레이션    showmigrations [X] 0001_initial
+                    makemigrations --check 로 모델과 일치 (No changes detected)
+    테이블          netbox_cloudinv_{cloudplatform,cloudresource,cloudservice}
+    페이지 렌더     목록·상세·추가·편집·일괄등록·변경이력 × 3모델 + 필터 + 검색
+                    전부 200
+    카운트          플랫폼 목록에 AWS 49 · Azure 51 · OCI 34 · Proxmox 26
+    분류 표시       "컴퓨트" (raw "compute" 아님)
+    필터 정확도     category=compute 결과에 EC2 있고 S3 없음
+    일괄 등록       CSV 직접 입력으로 생성 확인 (302)
+                    플랫폼과 서비스가 어긋난 행은 거부됨
+    전역 검색       서비스는 코드로, 자원은 이름·자원ID 로 검색됨
+                    새 행은 저장 시 자동 색인, 삭제하면 색인에서도 빠짐
+    attrs           빈 값 {} · 유효 JSON 보존 · 깨진 JSON 거부
 
 시험용으로 만든 행은 전부 지웠다. 자원 수는 0 이다.
 
-### 검증에서 걸린 것
+### 검증에서 잡은 결함 넷 - 전부 실제로 돌려봐야 드러났다
 
-**`manage.py check` 는 폼 오류를 못 잡는다.** check 는 통과했는데 추가·편집
-폼이 500 이었다. REST API 가 없어 `DynamicModelChoiceField` 의 reverse 가
-실패한 것이다. **폼을 실제로 렌더해 봐야 드러난다.**
+**`manage.py check` 로는 하나도 안 잡혔다.**
 
-**Django 테스트 클라이언트로 확인할 때 두 가지가 걸린다.** Host 헤더를 실제
-인그레스 호스트로 줘야 한다(아니면 ALLOWED_HOSTS 로 400). 그리고 로컬
-`admin` 계정은 **비활성**이라 로그인이 안 붙는다 - 활성 슈퍼유저는
-`akadmin` 이다.
+1. **REST API 가 없어 추가·편집 폼이 500.** `DynamicModelChoiceField` 가
+   드롭다운을 채우려고 API 목록 URL 을 reverse 한다. API 는 선택이 아니다.
+2. **카운트 컬럼이 전부 0.** `LinkedCountColumn` 은 annotate 된 값을 읽는데
+   뷰에서 안 걸어놨다. AWS 가 서비스 49개인데 화면에 0 으로 나왔다.
+   **페이지가 200 이라고 숫자가 맞는 것은 아니다.**
+3. **자원 표의 분류가 raw 값.** 관계 너머의 choice 라 `ChoiceFieldColumn` 이
+   라벨을 못 찾는다. `get_category_display` 를 쓴다.
+4. **attrs 를 비우면 자원 추가가 500.** 폼 JSONField 가 빈 값에 None 을
+   돌려주는데 컬럼은 NOT NULL 이다. 예외 경로가 아니라 가장 흔한 경로다.
+
+### 확인할 때 걸리는 것
+
+Django 테스트 클라이언트로 볼 때 **Host 를 실제 인그레스 호스트로** 줘야 한다
+(아니면 ALLOWED_HOSTS 로 400). 로컬 `admin` 은 **비활성**이라 로그인이 안 붙는다
+- 활성 슈퍼유저는 **`akadmin`** 이다.
