@@ -45,6 +45,25 @@ ConfigContext 에 있다. 보안목록으로 값어치를 확인한 뒤 넓힌�
 이 디렉터리는 업스트림에 존재하지 않으므로 **병합 충돌이 나지 않는다.**
 `netbox-docker` 를 포크할 필요도 없다.
 
+## REST API 는 선택 사항이 아니다
+
+`forms.py` 의 `SecurityRuleForm` 이 `SecurityList` 를 `DynamicModelChoiceField`
+로 받는다. 그 필드는 드롭다운을 채우려고 모델의 REST 목록 URL 을 reverse 하므로
+API 가 없으면 **보안규칙 추가·편집 화면이 500** 이 난다.
+
+    NoReverseMatch: 'netbox_oci-api' is not a registered namespace
+                    inside 'plugins-api'
+
+<!-- verified: 2026-09-07 | how: api/ 추가 후 이미지 4.6.9-16-g6466589b7 로
+     배포해 운영 파드에서 확인. 깨져 있던 2개 화면 200, 나머지 7개 화면과
+     포트 필터 회귀 없음, API 실응답 보안목록 9건 · 보안규칙 97건 -->
+
+목록·상세와 **보안목록 쪽 폼은 멀쩡했다** - 보안목록 폼이 참조하는 `Tenant` 는
+코어 모델이라 API 가 이미 있기 때문이다. 동기화가 ORM 으로 채우니 이 두 화면을
+쓸 일이 없어 오래 드러나지 않았다.
+
+`manage.py check` 는 이것을 잡지 못한다. **폼을 실제로 렌더해야 드러난다.**
+
 ## 켜기
 
     PLUGINS = ["netbox_oci"]
