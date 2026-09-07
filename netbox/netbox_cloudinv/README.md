@@ -70,6 +70,51 @@ Proxmox 는 사설이므로 `kind=private` 이다. `0.0.0.0/0` 이 인터넷 노
 플랫폼 안에서만 유일하므로, 다른 플랫폼의 같은 코드가 섞이면 등록이 거부된다
 (`nat-gateway` 처럼 양쪽에 다 있는 코드가 실제로 있다).
 
+## CLI 출력에서 가져오기 — tools/cloudinv-convert.py
+
+`aws`/`az`/`pvesh` 원본 출력은 import CSV 와 모양이 전혀 다르다. 사이를 잇는
+변환기가 `tools/cloudinv-convert.py` 다. **NetBox 도 자격증명도 필요 없고**
+표준 라이브러리만 쓴다 - 자격증명이 있는 곳에서 export 하고, 변환한 CSV 만
+NetBox 로 가져가면 된다.
+
+세 플랫폼 모두 "전체 나열" 명령 하나를 입력으로 쓴다.
+
+    aws     aws resourcegroupstaggingapi get-resources --output json > aws.json
+    azure   az resource list -o json > azure.json
+    proxmox pvesh get /cluster/resources --output-format json > pve.json
+
+    python3 tools/cloudinv-convert.py --platform aws --input aws.json > aws.csv
+
+나온 CSV 를 **자원 → 일괄 등록**에 붙여넣는다.
+
+### 무엇을 어떻게 채우나
+
+    aws       ARN 을 쪼개 (service, resource-type) 으로 서비스를 정한다.
+              ec2 하나가 인스턴스·볼륨·VPC·서브넷을 다 담으므로 service 만으로는
+              부족하다. region·account 도 ARN 에서 나온다.
+              ALB 는 loadbalancer/app/<이름>/<해시> 라 마지막 칸이 해시다 -
+              사람이 아는 이름인 앞칸을 쓴다.
+    azure     type(Microsoft.Xxx/yyy) 으로 서비스를, id 에서 구독 ID 를,
+              location 에서 리전을 뽑는다. resourceGroup 은 설명에 남긴다.
+    proxmox   type 으로 정하되 storage 는 plugintype 까지 본다(dir/zfs/rbd...).
+              node 를 리전으로 쓰고, running/stopped 를 상태로 옮긴다.
+
+환경은 태그에서 찾는다(`environment`/`env`/`stage`/`tier`, 대소문자 무관).
+없으면 `--environment` 기본값을 쓴다. 계정 이름이 원본에 없는 경우(Proxmox,
+S3 ARN 등)는 `--account` 로 준다.
+
+### 카탈로그에 없는 종류가 나오면
+
+**조용히 버리지 않는다.** 종류별 건수를 stderr 로 알리고 그 행을 뺀다.
+셋 중 하나를 고르면 된다.
+
+    --emit-services       모자란 서비스 카탈로그 CSV 를 뽑는다.
+                          먼저 '서비스 → 일괄 등록' 으로 넣고 다시 변환한다
+    --unknown-as <코드>    전부 그 코드로 몰아넣는다 (임시방편)
+    (아무것도 안 함)        그 종류는 빠진 채로 넘어간다
+
+매핑을 늘리려면 스크립트 위쪽의 `AWS` / `AZURE` / `PVE` 표에 한 줄 추가한다.
+
 ## 켜기
 
     PLUGINS = ["netbox_cloudinv"]
