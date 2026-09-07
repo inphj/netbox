@@ -86,15 +86,15 @@
             <div class="row">
               {% for backend in auth_backends %}
                 <div class="col">
-                  {# social-auth-app-django 6.0 부터 social:begin 이 @require_POST 다.
-                     GET 링크로 두면 405 가 난다. 로그인 CSRF 를 막기 위한 변경이라
-                     되돌리지 말고 폼으로 보낸다. 쿼리 파라미터(next, idp)는 action
-                     에 그대로 남는다 - POST 여도 쿼리는 전달된다. #}
-                  <form method="post" action="{{ backend.url }}" class="w-100">
+                  {# The social auth begin view accepts only POST requests #}
+                  <form action="{{ backend.url }}" method="post">
                     {% csrf_token %}
+                    {% for param, value in backend.params.items %}
+                      <input type="hidden" name="{{ param }}" value="{{ value }}" />
+                    {% endfor %}
                     <button type="submit" class="btn w-100">
                       {% if backend.icon_name %}<i class="mdi mdi-{{ backend.icon_name }}"></i>
-                      {% elif backend.icon_img %}<img src="{{ backend.icon_img }}" height="24"{% if backend.display_name %}class="me-2 sso-icon" {% endif %}/>{% endif %}
+                      {% elif backend.icon_img %}<img src="{{ backend.icon_img }}" height="24"{% if backend.display_name %} class="me-2 sso-icon"{% endif %}/>{% endif %}
                       {{ backend.display_name }}
                     </button>
                   </form>
