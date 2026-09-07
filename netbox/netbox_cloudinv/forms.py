@@ -1,11 +1,12 @@
 from django import forms
 
-from netbox.forms import (NetBoxModelFilterSetForm, NetBoxModelForm,
-                          NetBoxModelImportForm)
+from netbox.forms import (NetBoxModelBulkEditForm, NetBoxModelFilterSetForm,
+                          NetBoxModelForm, NetBoxModelImportForm)
 from tenancy.models import Tenant
 from utilities.forms.fields import (CSVChoiceField, CSVModelChoiceField,
                                     DynamicModelChoiceField,
                                     DynamicModelMultipleChoiceField)
+from utilities.forms.rendering import FieldSet
 
 from .models import (CloudPlatform, CloudResource, CloudService, PlatformKind,
                      ResourceStatus, ServiceCategory)
@@ -168,3 +169,63 @@ class CloudResourceImportForm(NetBoxModelImportForm):
                             f"'{platform.name}' 에 속하지 않는다"}
             )
         return self.cleaned_data
+
+
+# --------------------------------------------------------------------------
+# 일괄 편집
+#
+# 수기 입력이 유일한 경로이므로 "여러 건을 한꺼번에 고치기" 가 실제로 자주
+# 필요하다 - 환경을 prod 로 몰아주거나, 정리한 자원을 stopped 로 바꾸거나,
+# 소유를 한 팀으로 옮기는 식이다.
+#
+# 플랫폼·서비스는 일부러 뺐다. 서비스는 플랫폼에 속하므로 둘 중 하나만 바꾸면
+# 어긋난 조합이 만들어진다. 그건 건별 편집에서 하는 것이 맞다.
+# --------------------------------------------------------------------------
+
+
+class CloudPlatformBulkEditForm(NetBoxModelBulkEditForm):
+    model = CloudPlatform
+    kind = forms.ChoiceField(
+        choices=[("", "---")] + list(PlatformKind.choices), required=False,
+        label="구분",
+    )
+    description = forms.CharField(max_length=200, required=False, label="설명")
+    fieldsets = (FieldSet("kind", "description"),)
+    nullable_fields = ("description",)
+
+
+class CloudServiceBulkEditForm(NetBoxModelBulkEditForm):
+    model = CloudService
+    category = forms.ChoiceField(
+        choices=[("", "---")] + list(ServiceCategory.choices), required=False,
+        label="분류",
+    )
+    description = forms.CharField(max_length=200, required=False, label="설명")
+    fieldsets = (FieldSet("category", "description"),)
+    nullable_fields = ("description",)
+
+
+class CloudResourceBulkEditForm(NetBoxModelBulkEditForm):
+    model = CloudResource
+    status = forms.ChoiceField(
+        choices=[("", "---")] + list(ResourceStatus.choices), required=False,
+        label="상태",
+    )
+    account = forms.CharField(max_length=100, required=False, label="계정")
+    region = forms.CharField(max_length=50, required=False, label="리전")
+    environment = forms.CharField(max_length=50, required=False, label="환경")
+    tenant = DynamicModelChoiceField(
+        queryset=Tenant.objects.all(), required=False, label="소유",
+    )
+    monthly_cost = forms.DecimalField(
+        max_digits=12, decimal_places=2, required=False, min_value=0,
+        label="월 비용",
+    )
+    description = forms.CharField(max_length=200, required=False, label="설명")
+    fieldsets = (
+        FieldSet("status", "environment", "tenant", name="분류"),
+        FieldSet("account", "region", name="위치"),
+        FieldSet("monthly_cost", "description", name="기타"),
+    )
+    nullable_fields = ("account", "region", "environment", "tenant",
+                       "monthly_cost", "description")

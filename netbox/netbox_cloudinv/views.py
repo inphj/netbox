@@ -46,6 +46,13 @@ class CloudPlatformBulkImportView(generic.BulkImportView):
     model_form = forms.CloudPlatformImportForm
 
 
+class CloudPlatformBulkEditView(generic.BulkEditView):
+    queryset = CloudPlatform.objects.all()
+    filterset = filtersets.CloudPlatformFilterSet
+    table = tables.CloudPlatformTable
+    form = forms.CloudPlatformBulkEditForm
+
+
 class CloudPlatformBulkDeleteView(generic.BulkDeleteView):
     queryset = CloudPlatform.objects.all()
     table = tables.CloudPlatformTable
@@ -89,6 +96,13 @@ class CloudServiceBulkImportView(generic.BulkImportView):
     model_form = forms.CloudServiceImportForm
 
 
+class CloudServiceBulkEditView(generic.BulkEditView):
+    queryset = CloudService.objects.all()
+    filterset = filtersets.CloudServiceFilterSet
+    table = tables.CloudServiceTable
+    form = forms.CloudServiceBulkEditForm
+
+
 class CloudServiceBulkDeleteView(generic.BulkDeleteView):
     queryset = CloudService.objects.all()
     table = tables.CloudServiceTable
@@ -122,6 +136,13 @@ class CloudResourceDeleteView(generic.ObjectDeleteView):
 class CloudResourceBulkImportView(generic.BulkImportView):
     queryset = CloudResource.objects.all()
     model_form = forms.CloudResourceImportForm
+
+
+class CloudResourceBulkEditView(generic.BulkEditView):
+    queryset = CloudResource.objects.all()
+    filterset = filtersets.CloudResourceFilterSet
+    table = tables.CloudResourceTable
+    form = forms.CloudResourceBulkEditForm
 
 
 class CloudResourceBulkDeleteView(generic.BulkDeleteView):

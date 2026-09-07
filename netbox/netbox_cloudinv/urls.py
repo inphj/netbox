@@ -13,6 +13,8 @@ def _crud(prefix, name, viewset, model):
         path(f"{prefix}/", viewset["list"].as_view(), name=f"{name}_list"),
         path(f"{prefix}/add/", viewset["edit"].as_view(), name=f"{name}_add"),
         path(f"{prefix}/import/", viewset["import"].as_view(), name=f"{name}_import"),
+        path(f"{prefix}/edit/", viewset["bulk_edit"].as_view(),
+             name=f"{name}_bulk_edit"),
         path(f"{prefix}/delete/", viewset["bulk_delete"].as_view(),
              name=f"{name}_bulk_delete"),
         path(f"{prefix}/<int:pk>/", viewset["detail"].as_view(), name=name),
@@ -31,6 +33,7 @@ urlpatterns = (
         "edit": views.CloudPlatformEditView,
         "delete": views.CloudPlatformDeleteView,
         "import": views.CloudPlatformBulkImportView,
+        "bulk_edit": views.CloudPlatformBulkEditView,
         "bulk_delete": views.CloudPlatformBulkDeleteView,
     }, CloudPlatform)
     + _crud("services", "cloudservice", {
@@ -39,6 +42,7 @@ urlpatterns = (
         "edit": views.CloudServiceEditView,
         "delete": views.CloudServiceDeleteView,
         "import": views.CloudServiceBulkImportView,
+        "bulk_edit": views.CloudServiceBulkEditView,
         "bulk_delete": views.CloudServiceBulkDeleteView,
     }, CloudService)
     + _crud("resources", "cloudresource", {
@@ -47,6 +51,7 @@ urlpatterns = (
         "edit": views.CloudResourceEditView,
         "delete": views.CloudResourceDeleteView,
         "import": views.CloudResourceBulkImportView,
+        "bulk_edit": views.CloudResourceBulkEditView,
         "bulk_delete": views.CloudResourceBulkDeleteView,
     }, CloudResource)
 )
