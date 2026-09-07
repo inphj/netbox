@@ -137,6 +137,34 @@ class CloudResourceBulkImportView(generic.BulkImportView):
     queryset = CloudResource.objects.all()
     model_form = forms.CloudResourceImportForm
 
+    def _process_import_records(self, form, request, records, prefetched_objects):
+        """같은 자원을 다시 넣으면 새로 만들지 말고 갱신한다.
+
+        자산 대장은 주기적으로 다시 수집해 넣는다. 그때마다 행이 새로 생기면
+        대장이 아니라 로그가 된다. 유일 제약이 중복을 막아주지만, 갱신이 없으면
+        재수입이 통째로 실패할 뿐이라 쓸 수가 없다.
+
+        코어는 레코드에 `id` 가 있으면 그 객체를 갱신한다(_process_import_records).
+        그러므로 자연키로 찾은 pk 를 미리 채워 넣으면 코어 로직을 그대로 쓰면서
+        upsert 가 된다 - 변경 이력 스냅샷과 검증도 코어 것을 그대로 탄다.
+
+        자연키는 제약과 같은 (platform, account, native_id) 다. native_id 가
+        없는 행은 손으로 넣은 것이므로 건드리지 않는다.
+        """
+        for record in records:
+            if record.get("id") or not record.get("native_id"):
+                continue
+            obj = CloudResource.objects.filter(
+                platform__name=record.get("platform") or "",
+                account=record.get("account") or "",
+                native_id=record["native_id"],
+            ).first()
+            if obj is not None:
+                record["id"] = obj.pk
+                prefetched_objects[obj.pk] = obj
+        return super()._process_import_records(
+            form, request, records, prefetched_objects)
+
 
 class CloudResourceBulkEditView(generic.BulkEditView):
     queryset = CloudResource.objects.all()

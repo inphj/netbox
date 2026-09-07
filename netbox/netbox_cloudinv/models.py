@@ -138,6 +138,22 @@ class CloudResource(NetBoxModel):
         # 손으로 쓴 마이그레이션과 어긋난다.
         indexes = [models.Index(fields=["native_id"],
                                 name="cloudinv_native_id_idx")]
+        constraints = [
+            # 자산 대장이므로 같은 자원이 두 벌 있으면 안 된다.
+            #
+            # platform 만으로는 부족하다. AWS ARN 과 Azure 리소스 ID 는 전역
+            # 유일하지만 **Proxmox 의 qemu/101 은 클러스터 안에서만 유일**하다.
+            # 그래서 account(= 계정/구독/클러스터)까지 키에 넣는다.
+            #
+            # native_id 가 빈 행은 제외한다(조건부 제약). 손으로 넣는 자원은
+            # 자원 ID 가 없을 수 있는데, 빈 문자열끼리는 서로 같다고 판정돼
+            # 두 번째 행부터 막히기 때문이다.
+            models.UniqueConstraint(
+                fields=("platform", "account", "native_id"),
+                condition=~models.Q(native_id=""),
+                name="cloudinv_resource_native_uniq",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.platform.name}/{self.name}"
