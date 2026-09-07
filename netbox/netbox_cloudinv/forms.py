@@ -131,6 +131,14 @@ class CloudResourceFilterForm(NetBoxModelFilterSetForm):
     tenant_id = DynamicModelMultipleChoiceField(
         queryset=Tenant.objects.all(), required=False, label="소유",
     )
+    stale_days = forms.IntegerField(
+        required=False, min_value=1, label="N일 이상 미확인",
+        help_text="수집에서 이만큼 안 보인 자원. 사라졌을 가능성이 있다",
+    )
+    never_seen = forms.NullBooleanField(
+        required=False, label="수집된 적 없음",
+        widget=forms.Select(choices=[("", "---"), ("true", "예"), ("false", "아니오")]),
+    )
 
 
 class CloudResourceImportForm(NetBoxModelImportForm):

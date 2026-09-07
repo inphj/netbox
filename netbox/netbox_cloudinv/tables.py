@@ -57,11 +57,12 @@ class CloudResourceTable(NetBoxTable):
     tenant = tables.Column(linkify=True, verbose_name="소유")
     monthly_cost = tables.Column(verbose_name="월 비용")
     native_id = tables.Column(verbose_name="자원 ID")
+    last_seen = columns.DateTimeColumn(verbose_name="최근 수집")
 
     class Meta(NetBoxTable.Meta):
         model = CloudResource
         fields = ("pk", "id", "name", "platform", "service", "category", "account",
                   "region", "environment", "status", "tenant", "monthly_cost",
-                  "native_id", "description")
+                  "native_id", "last_seen", "description")
         default_columns = ("name", "platform", "service", "account", "region",
-                           "environment", "status")
+                           "environment", "status", "last_seen")

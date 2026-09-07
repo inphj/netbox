@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from netbox.views import generic
 from utilities.query import count_related
 
@@ -162,8 +164,23 @@ class CloudResourceBulkImportView(generic.BulkImportView):
             if obj is not None:
                 record["id"] = obj.pk
                 prefetched_objects[obj.pk] = obj
-        return super()._process_import_records(
+        saved = super()._process_import_records(
             form, request, records, prefetched_objects)
+
+        # 이번 수집에서 확인된 자원에 시각을 남긴다. 사라진 자원을 자동으로
+        # 폐기 처리하지 않는 이유는 **부분 수입** 때문이다 - ec2-instances 만
+        # 넣었는데 나머지를 "사라졌다"고 판정하면 멀쩡한 자원이 죽는다.
+        # 대신 마지막으로 확인된 시각을 남기고, 오래된 것을 사람이 보고 정한다.
+        #
+        # update() 를 쓰는 것은 의도적이다. save() 를 돌리면 시각만 바뀐 변경
+        # 이력이 매 수입마다 쌓여 진짜 변경이 묻힌다.
+        now = timezone.now()
+        if saved:
+            CloudResource.objects.filter(pk__in=[o.pk for o in saved]).update(
+                last_seen=now)
+            for o in saved:
+                o.last_seen = now
+        return saved
 
 
 class CloudResourceBulkEditView(generic.BulkEditView):

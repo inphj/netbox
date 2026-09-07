@@ -20,6 +20,9 @@
         <tr><th scope="row">{% trans "소유" %}</th>
             <td>{% if object.tenant %}<a href="{{ object.tenant.get_absolute_url }}">{{ object.tenant }}</a>{% else %}&mdash;{% endif %}</td></tr>
         <tr><th scope="row">{% trans "월 비용" %}</th><td>{{ object.monthly_cost|placeholder }}</td></tr>
+        <tr><th scope="row">{% trans "최근 수집" %}</th>
+            <td>{% if object.last_seen %}{{ object.last_seen }}
+                {% else %}<span class="text-muted">{% trans "수집된 적 없음 (수기 입력)" %}</span>{% endif %}</td></tr>
         <tr><th scope="row">{% trans "설명" %}</th><td>{{ object.description|placeholder }}</td></tr>
       </table>
     </div>

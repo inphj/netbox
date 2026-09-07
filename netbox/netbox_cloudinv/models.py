@@ -125,6 +125,11 @@ class CloudResource(NetBoxModel):
         validators=[MinValueValidator(0)], verbose_name="월 비용",
     )
     description = models.CharField(max_length=200, blank=True, verbose_name="설명")
+    last_seen = models.DateTimeField(
+        null=True, blank=True, verbose_name="최근 수집",
+        help_text="수집(일괄 등록)에서 마지막으로 확인된 시각. "
+                  "손으로 넣은 자원은 비어 있다",
+    )
     attrs = models.JSONField(
         default=dict, blank=True, verbose_name="속성",
         help_text="타입별 세부 속성. 예: {\"instance_type\": \"t3.medium\"}",
