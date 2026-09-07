@@ -125,6 +125,31 @@ Proxmox 의 `/cluster/resources` 와 Azure 의 `az resource list` 는 기본 입
 행당 0.5~1.3KB 다(ec2 인스턴스 1.1KB, proxmox 0.6KB). 1만 건이어도 10MB 수준이라
 그냥 담는 편이 낫지만, 용량이 문제면 `--no-raw` 로 끌 수 있다.
 
+### 여러 source 를 한 번에 — --merge
+
+source 를 나눠 돌리면 파일이 여러 개 나온다. **그냥 이어붙이면 안 된다.**
+
+    CSV   source 마다 헤더가 다르다(빈 칸을 빼므로). 이어붙이면 깨진다
+    JSON  같은 자원이 두 source 에 나온다. 태그 API 와 describe-instances 는
+          같은 EC2 인스턴스를 각각 낸다. 한 파일에 같은 자연키가 둘이면
+          수입 때 나중 것이 앞 것을 덮어써 **정보가 줄어든다**
+
+그래서 합치는 것도 변환기가 한다.
+
+    python3 tools/cloudinv-convert.py --merge aws-tags.json aws-ec2.json         aws-vol.json azure.json pve.json > all.json
+
+자연키 `(platform, account, native_id)` 로 묶어 합친다.
+
+    스칼라 칸   나중 파일이 이긴다. 단 빈 값으로는 덮지 않는다
+    attrs      키 단위로 합친다. 나중 파일이 같은 키를 이긴다
+    자연키 없음  (native_id 가 빈 행) 합치지 않고 그대로 둔다
+
+겹친 자원은 **두 source 의 값이 모두 남는다** - 태그 API 의 `arn_type` 과
+describe 의 `instance_type` 이 한 자원에 같이 들어간다.
+
+한 파일에 플랫폼이 섞여도 된다. 실측 - AWS 12 · Azure 4 · Proxmox 7,
+서비스 19종을 한 번에 넣었고 재수입해도 건수가 그대로였다.
+
 ### CSV 냐 JSON 이냐 — --format
 
 값이 중첩되면(이미지 정보, 태그, 부착목록) **JSON 이 낫다.**
@@ -304,6 +329,10 @@ changelog 0건). 자동 수집을 안 하는 대가로 얻는 것이다.
     편집            이름·상태·비용 변경이 반영됨 (302)
     일괄 삭제        선택한 자원이 실제로 지워짐
     CSV 등록        자원·서비스·플랫폼 세 모델 모두 등록됨
+    여러 source     6개 파일 25건 -> 병합 23건(겹친 2건), 자연키 중복 0
+                    겹친 EC2 에 두 source 의 attrs 가 모두 남음
+                    한 파일로 AWS 12·Azure 4·Proxmox 7, 서비스 19종 수입
+                    재수입해도 23건 그대로
     최근 수집       수입 시 last_seen 기록, 수기 자원은 비어 있음
                     stale_days=30 -> 1건 / 60 -> 0건 (필터 정확)
                     never_seen 로 수기 입력분 분리됨
