@@ -87,6 +87,40 @@ NetBox 로 가져가면 된다.
 
 나온 CSV 를 **자원 → 일괄 등록**에 붙여넣는다.
 
+### 플랫폼 고유 값까지 담기 — --source
+
+**AWS 태그 API 는 ARN 과 태그밖에 주지 않는다.** 인스턴스 타입이나 볼륨 크기
+같은 값이 필요하면 describe 출력을 줘야 한다.
+
+    --source ec2-instances   aws ec2 describe-instances
+    --source ec2-volumes     aws ec2 describe-volumes
+    --source rds             aws rds describe-db-instances
+    --source vm              az vm list -d -o json
+
+Proxmox 의 `/cluster/resources` 와 Azure 의 `az resource list` 는 기본 입력에
+이미 값이 실려 있어 따로 줄 것이 없다.
+
+담기는 값(예):
+
+    ec2-instances  인스턴스타입 · AZ · 사설/공인 IP · AMI · VPC · 서브넷 · 아키텍처
+    ec2-volumes    크기 · 볼륨타입 · IOPS · 처리량 · 암호화 · 부착 인스턴스
+    rds            인스턴스클래스 · 엔진 · 버전 · 용량 · MultiAZ
+    azure vm       vmSize · OS 종류/디스크 · 이미지 · 전원상태 · IP · 존
+    azure 기본     resourceGroup · kind · sku(name/tier/capacity) · managedBy
+    proxmox        vmid · pool · template · maxcpu · maxmem · maxdisk · uptime
+
+전부 자원의 `attrs` 로 들어간다. 태그도 `attrs.tags` 에 통째로 남는다.
+
+### CSV 냐 JSON 이냐 — --format
+
+값이 중첩되면(이미지 정보, 태그, 부착목록) **JSON 이 낫다.**
+
+    --format csv    기본. attrs 는 JSON 문자열 한 칸에 들어간다
+    --format json   attrs 가 중첩 객체 그대로 실린다
+
+일괄 등록 화면에서 형식을 맞춰 고르면 된다. 폼의 JSONField 가 문자열도 dict 도
+받으므로 둘 다 동작한다.
+
 ### 무엇을 어떻게 채우나
 
     aws       ARN 을 쪼개 (service, resource-type) 으로 서비스를 정한다.

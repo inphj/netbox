@@ -155,7 +155,18 @@ class CloudResourceImportForm(NetBoxModelImportForm):
     class Meta:
         model = CloudResource
         fields = ("platform", "service", "name", "native_id", "account", "region",
-                  "environment", "status", "tenant", "monthly_cost", "description")
+                  "environment", "status", "tenant", "monthly_cost", "description",
+                  "attrs")
+
+    def clean_attrs(self):
+        """플랫폼마다 다른 값(인스턴스 타입·크기·태그 등)이 들어오는 칸이다.
+
+        CSV 로 오면 JSON **문자열**, JSON/YAML 로 오면 이미 dict 다. Django 의
+        JSONField 가 둘 다 받는다. 빈 값은 None 이 되는데 컬럼이 NOT NULL 이라
+        여기서 {} 로 바로잡는다 - 건별 폼과 같은 이유다.
+        """
+        value = self.cleaned_data.get("attrs")
+        return {} if value is None else value
 
     def clean(self):
         """서비스 코드는 플랫폼 안에서만 유일하다. 다른 플랫폼의 같은 코드가
