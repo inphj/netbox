@@ -15,9 +15,32 @@
 
     2026-08-30  upstream v4.6.9 에서 갈라짐
     2026-09-07  upstream v4.6.10 병합 (충돌 1건: requirements.txt)
+    2026-09-07  upstream v4.7.0  병합 (충돌 1건: login.html)
+
+**v4.7.0 시점에 코어 수정이 0건이 됐다.** 아래 1·2번을 업스트림이 같은 방식으로
+흡수했다. 지금 이 포크가 업스트림과 다른 점은 **플러그인 두 개뿐**이고, 그것은
+업스트림에 없는 디렉터리라 충돌하지 않는다. 병합 부담이 사실상 사라졌다.
 
 
 ## 병합 기록
+
+**v4.7.0 (2026-09-07).** 충돌은 `login.html` 한 곳. **업스트림 것을 받았다** -
+업스트림도 social-auth 6.0 의 `require_POST` 를 폼으로 처리했고, 그쪽이 더 낫다.
+우리 판은 쿼리 파라미터가 action URL 에 남는 것에 의존했는데 업스트림은
+`backend.params` 를 hidden input 으로 명시 전달한다.
+
+`requirements.txt` 는 **충돌조차 나지 않았다** - 업스트림 4.7.0 이
+`social-auth-app-django 6.0.1` / `social-auth-core 5.1.0` 을 채택했다. 우리가
+포크를 만들면서 핀했던 바로 그 조합이다.
+
+전제조건 확인(4.7 의 Breaking Changes): PostgreSQL **16.14** (15+ 필요),
+Redis **7.4.10** (6+ 필요), `RQ_DEFAULT_TIMEOUT` 미설정이라
+`WEBHOOK_DEFAULT_TIMEOUT` 강제 조건에 안 걸림. 마이그레이션 **41건**
+(ltree, denormalization 트리거, unique 제약 통합).
+
+빌드 도구 `netbox-docker` 는 **5.0.2 그대로 뒀다.** 5.1.0 이 나와 있지만
+의존성 갱신뿐이고, 문제가 났을 때 원인이 NetBox 4.7 인지 빌드도구인지
+섞이면 안 되기 때문이다.
 
 **v4.6.10 (2026-09-07).** 충돌은 `requirements.txt` 한 곳뿐이었다 - 아래
 1번에서 고친 바로 그 줄이다. 해소 방침:
@@ -34,6 +57,9 @@
 ---
 
 ## 1. social-auth-core 5.1.0 으로 올림 (2026-08-30)
+
+> **해소됨 (v4.7.0, 2026-09-07).** 업스트림이 같은 버전을 채택했다.
+> 이 항목은 더 이상 로컬 수정이 아니다. 기록으로만 남긴다.
 
 **왜** — Trivy 가 운영 이미지에서 `CVE-2026-48526` (HIGH) 를 잡았다.
 PyJWT 2.12.1 의 *Authentication bypass due to forged JSON Web Tokens* 다.
