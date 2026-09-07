@@ -213,6 +213,11 @@ changelog 0건). 자동 수집을 안 하는 대가로 얻는 것이다.
     편집            이름·상태·비용 변경이 반영됨 (302)
     일괄 삭제        선택한 자원이 실제로 지워짐
     CSV 등록        자원·서비스·플랫폼 세 모델 모두 등록됨
+    attrs 반입      CSV(JSON 문자열)·JSON(중첩 객체) 양쪽 모두 302
+                    저장된 타입이 문자열이 아니라 dict 임을 확인
+                    중첩 값 보존 - ec2 tags, proxmox maxmem_bytes 8589934592
+    변환기 source   ec2-instances · ec2-volumes · rds · azure vm 각각 값 추출
+                    잘못된 플랫폼/source 조합은 인자 검사에서 막힘
     일괄 편집       자원 3건을 한 번에 env/status/region 변경 (302)
                     _nullify 로 account 비우기 동작
                     서비스·플랫폼 폼도 렌더됨
