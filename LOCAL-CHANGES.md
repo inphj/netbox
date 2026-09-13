@@ -23,7 +23,8 @@
   이미지 빌드(`infra-gitops` `k3s/ops/netbox-build/build.sh`)가 selfplugin 을 복사해 덮으므로 여기 고쳐도
   이미지에 안 들어간다. 지울지는 사용자 결정으로 남겨 뒀다.
 - **코어(`netbox/`)를 고치면 이 파일에 한 항목을 더한다** — 무엇을 왜, 되돌리는 법까지. PR 체크
-  (`.github/workflows/local-check.yml`, 홈랩 자체 러너)가 확인한다. 업스트림 병합 PR(머지 커밋 포함)은 예외.
+  (`.github/workflows/local-check.yml`, GitHub 호스트 러너)가 확인한다. 업스트림을 끌어오는 머지 커밋이 있는 PR 만 예외
+  (main 을 feature 에 병합한 것은 예외가 아니다).
 - **업스트림 병합은 별도 PR 로.** 기능 변경과 섞지 않는다.
 - 클라우드 세션은 홈랩에 닿지 않는다. 이미지·릴리스·배포는 노드에서 사람이 한다 — 여기서 "릴리스됐다"·
   "배포됐다"고 쓰지 않는다. 체크는 둘: 업스트림 `ci.yml` 등 + `local-check.yml`(바뀐 `.py` 컴파일 + 이 파일 규칙). 둘 다 GitHub

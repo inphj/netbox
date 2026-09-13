@@ -4,7 +4,9 @@ name: 포크 검증
 # 러너에서 그대로 돈다(공개 저장소라 무료). 이 파일은 그것과 별개로 **포크 규칙**만 잡는다:
 #   1. 바뀐 .py 가 컴파일되는가 (전체 컴파일은 저장소가 커서 바뀐 파일만)
 #   2. 포크의 코어(netbox/)를 고쳤으면 LOCAL-CHANGES.md 도 같이 고쳤는가
-#      - 업스트림을 병합하는 PR(머지 커밋 포함)은 이 규칙에서 뺀다. 그건 우리 변경이 아니다.
+#      - 업스트림을 병합하는 PR 은 이 규칙에서 뺀다. 그건 우리 변경이 아니다. 판정은 "머지 커밋의 둘째 부모가
+#        origin/main 밖(=업스트림)인가" 로 한다 - main 을 feature 에 병합만 한 PR 은 예외가 아니다
+#        (NetBox 세션 지적 2026-09-13: 머지 커밋 유무만 보면 그런 PR 에서 규칙이 조용히 꺼진다).
 #      - netbox/netbox_oci, netbox/netbox_cloudinv 는 코어가 아니라 플러그인의 구식 사본이라 뺀다
 #        (실측 2026-09-13: 포크와 v4.7.0 의 차이는 이 두 디렉터리 + LOCAL-CHANGES.md 뿐. 빌드는
 #        infra-opensource 의 플러그인을 복사해 덮으므로 이 사본은 이미지에 안 들어간다).
@@ -46,9 +48,12 @@ jobs:
         run: |
           set -euo pipefail
           base="${{ github.event.pull_request.base.sha }}"
-          if [ -n "$(git log --merges --oneline "$base..HEAD")" ]; then
-            echo "머지 커밋이 있다(업스트림 병합으로 본다) - LOCAL-CHANGES 규칙 생략"; exit 0
-          fi
+          for m in $(git log --merges --format=%H "$base..HEAD"); do
+            p2=$(git rev-parse "$m^2")
+            if ! git merge-base --is-ancestor "$p2" origin/main; then
+              echo "업스트림을 끌어오는 머지 커밋 $m (둘째 부모 ${p2:0:7} 가 origin/main 밖) - LOCAL-CHANGES 규칙 생략"; exit 0
+            fi
+          done
           changed=$(git diff --name-only "$base" HEAD)
           core=$(echo "$changed" | grep -E '^netbox/' \
                  | grep -vE '^netbox/(translations|netbox_oci|netbox_cloudinv)/' || true)
