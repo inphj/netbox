@@ -1,0 +1,53 @@
+name: 포크 검증 (자체 러너)
+
+# 이 저장소는 netbox-community/netbox 의 포크다. 업스트림 워크플로(ci.yml 등)는 GitHub 호스트
+# 러너에서 그대로 돈다(공개 저장소라 무료). 이 파일은 그것과 별개로 **포크 규칙**만 잡는다:
+#   1. 바뀐 .py 가 컴파일되는가 (전체 컴파일은 저장소가 커서 바뀐 파일만)
+#   2. 포크의 코어(netbox/)를 고쳤으면 LOCAL-CHANGES.md 도 같이 고쳤는가
+#      - 업스트림을 병합하는 PR(머지 커밋 포함)은 이 규칙에서 뺀다. 그건 우리 변경이 아니다.
+# 검증은 클러스터 안 자체 러너(infra-gitops k3s/arc, org 단위)에서 돈다.
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: fork-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fork_rules:
+    name: 포크 규칙
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: arc-ci
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 바뀐 .py 컴파일
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          mapfile -t files < <(git diff --name-only --diff-filter=AM "$base" HEAD -- '*.py')
+          echo "바뀐 .py: ${#files[@]}개"
+          [ "${#files[@]}" = 0 ] || python3 -m py_compile "${files[@]}"
+
+      - name: 코어를 고쳤으면 LOCAL-CHANGES.md 도 고쳤는가
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$(git log --merges --oneline "$base..HEAD")" ]; then
+            echo "머지 커밋이 있다(업스트림 병합으로 본다) - LOCAL-CHANGES 규칙 생략"; exit 0
+          fi
+          changed=$(git diff --name-only "$base" HEAD)
+          core=$(echo "$changed" | grep -E '^netbox/' | grep -vE '^netbox/translations/' || true)
+          if [ -z "$core" ]; then echo "코어 변경 없음"; exit 0; fi
+          echo "$changed" | grep -qx 'LOCAL-CHANGES.md' && { echo "LOCAL-CHANGES.md 갱신됨"; exit 0; }
+          echo "NG: 코어 파일이 바뀌었는데 LOCAL-CHANGES.md 가 안 바뀌었다. 포크 원칙: 바꿀 때마다 한 항목씩, 되돌리는 법까지."
+          echo "$core" | sed 's/^/  /'
+          exit 1
