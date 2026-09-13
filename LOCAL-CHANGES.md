@@ -11,6 +11,24 @@
   매니페스트(k3s-gitops)에 둔다. 이 포크는 어느 환경에나 그대로 옮겨간다.
 - 바꿀 때마다 아래에 **한 항목씩** 추가한다. 되돌리는 법까지 적는다.
 
+## 작업자(사람·Claude 세션)가 지킬 것 — 2026-09-13
+
+`CLAUDE.md` 는 업스트림 파일(`@./AGENTS.md`)이라 덮어쓰지 않는다. 우리 규칙은 여기 두고 `CLAUDE.md` 가
+이 파일을 한 줄로 가리킨다 — 업스트림 병합 때 그 한 줄만 다시 붙이면 된다.
+
+- **기능은 포크에 넣지 않는다.** 플러그인으로 만들 수 있으면 `inphj-org/infra-opensource` 의
+  `netbox-selfplugin/` 으로. 실측(2026-09-13): 포크와 v4.7.0 의 차이는 `netbox/netbox_oci`·
+  `netbox/netbox_cloudinv` 두 디렉터리(45파일)와 이 파일뿐이다.
+- **포크 안 `netbox/netbox_oci`·`netbox/netbox_cloudinv` 는 고치지 않는다.** selfplugin 저장소의 구식 사본이다.
+  이미지 빌드(`infra-gitops` `k3s/ops/netbox-build/build.sh`)가 selfplugin 을 복사해 덮으므로 여기 고쳐도
+  이미지에 안 들어간다. 지울지는 사용자 결정으로 남겨 뒀다.
+- **코어(`netbox/`)를 고치면 이 파일에 한 항목을 더한다** — 무엇을 왜, 되돌리는 법까지. PR 체크
+  (`.github/workflows/local-check.yml`, 홈랩 자체 러너)가 확인한다. 업스트림 병합 PR(머지 커밋 포함)은 예외.
+- **업스트림 병합은 별도 PR 로.** 기능 변경과 섞지 않는다.
+- 클라우드 세션은 홈랩에 닿지 않는다. 이미지·릴리스·배포는 노드에서 사람이 한다 — 여기서 "릴리스됐다"·
+  "배포됐다"고 쓰지 않는다. 체크는 둘: 업스트림 `ci.yml` 등(GitHub 호스트, 공개라 무료) + `local-check.yml`
+  (자체 러너 `arc-ci`: 바뀐 `.py` 컴파일 + 이 파일 규칙).
+
 ## 기반
 
     2026-08-30  upstream v4.6.9 에서 갈라짐
